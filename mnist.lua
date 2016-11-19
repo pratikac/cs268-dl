@@ -1,14 +1,12 @@
 require 'torch'
-local pretty = require 'pl.pretty'
 local lapp = require 'pl.lapp'
-lapp.slack = true
 
 local mnist = require 'mnist'
 require 'optim'
 
 -- some command line parameters
 local opt = lapp[[
--b,--batch_size     (default 32)                Batch size
+-b,--batch_size     (default 256)               Batch size
 --LR                (default 1e-3)              Learning rate
 --L2                (default 1e-3)              Weight decay / L2 regularization
 -g,--gpu            (default 0)                 GPU idx (set zero for CPU)
@@ -62,7 +60,6 @@ function load_mnist()
 end
 
 -- build a LeNet model for MNIST
--- should converge to ~0.75% generalization error
 function build_model()
     -- a block of convolution - ReLU - max-pooling - batch-normalization - dropout
     -- fin: number of input filters for the convolutional layer
@@ -115,7 +112,7 @@ function trainer(model, cost, d)
 
         -- randomly sample batch_size elements from the training set
         local idx = torch.Tensor(bs):random(1, x:size(1)):type('torch.LongTensor')
-        local xc, yc = x:index(1, idx), y:index(1, idx):cuda()
+        local xc, yc = x:index(1, idx):cuda(), y:index(1, idx):cuda()
 
         -- evaluates the forward and backward pass on the network
         -- and the loss function, gradients are given out as dw
@@ -147,7 +144,7 @@ function trainer(model, cost, d)
             print( ('+[%2d][%3d/%3d] Loss: %.5f Error: %.3f %%'):format(epoch, b, num_batches, loss/b, (1 - confusion.totalValid)*100))
         end
     end
-    print( ('*[%2d] Loss: %.5f Error: %.3f %%'):format(epoch, loss/num_batches, (1 - confusion.totalValid)*100))    
+    print( ('++[%2d] Loss: %.5f Error: %.3f %%'):format(epoch, loss/num_batches, (1 - confusion.totalValid)*100))    
 end
 
 function tester(model, cost, d)
@@ -174,7 +171,7 @@ function tester(model, cost, d)
         confusion:updateValids()
         
         if b % 10 == 0 then
-            print( ('++[%2d][%3d/%3d] Error: %.3f %%'):format(epoch, b, num_batches, (1 - confusion.totalValid)*100))
+            print( ('*[%2d][%3d/%3d] Error: %.3f %%'):format(epoch, b, num_batches, (1 - confusion.totalValid)*100))
         end
     end
     print( ('**[%2d] Error: %.3f %%'):format(epoch, (1 - confusion.totalValid)*100))
@@ -188,17 +185,19 @@ function main()
     classes = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
     confusion = optim.ConfusionMatrix(classes)
     optim_state = { learningRate= opt.LR,
-                    weightDecay = opt.L2}
+                    weightDecay = opt.L2,
+                    learningRateDecay = 1e-3}
 
     local model, cost = build_model()
     local train, test = load_mnist()
 
     epoch = 1
     while epoch <= opt.max_epochs do
-        --trainer(model, cost, train)
+        trainer(model, cost, train)
         tester(model, cost, test)
         epoch = epoch + 1
         --torch.save('lenet.t7', model)
+        print('')
     end
 end
 
