@@ -48,7 +48,7 @@ function load_mnist()
 
     -- scale data to lie between [-1,1]
     train.data:add(-128):div(128)
-    -- torch likes 1-indexed labels, so we add 1 to add classes
+    -- torch likes 1-indexed labels, so we add 1 to class labels
     -- which are originally from [0,9]
     train.label:add(1)
 
