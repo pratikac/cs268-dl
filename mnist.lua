@@ -47,13 +47,13 @@ function load_mnist()
     test.data = test.data:reshape(10000, 1, 28, 28):float()
 
     -- scale data to lie between [-1,1]
-    train.data:add(-126):div(126)
+    train.data:add(-128):div(128)
     -- torch likes 1-indexed labels, so we add 1 to add classes
     -- which are originally from [0,9]
     train.label:add(1)
 
     -- will just use the test set as validation set here
-    test.data:add(-126):div(126)
+    test.data:add(-128):div(128)
     test.label:add(1)
 
     return {train.data, train.label}, {test.data, test.label}
