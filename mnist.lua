@@ -151,7 +151,7 @@ function tester(model, cost, d)
     local x, y = d[1], d[2]
     model:evaluate()
 
-    local num_batches = x:size(1)/opt.batch_size
+    local num_batches = math.ceil(x:size(1)/opt.batch_size)
     local bs = opt.batch_size
 
     confusion:zero()
