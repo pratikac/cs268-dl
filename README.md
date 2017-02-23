@@ -28,4 +28,4 @@ The file ``mnist.py`` contains code to train a CNN on MNIST using [PyTorch](http
     ```
 3. You can now run the code in ``mnist.py`` by doing ``python mnist.py``. It has a few parameters which you can find out by ``python mnist.py -h``.
 
-4. It will download the MNIST dataset and train a convolutional neural network on it. You should expect a test error of about 0.6% after 100 epochs using the parameters in the code (learning rate = 0.1).
+4. It will download the MNIST dataset and train a convolutional neural network on it. You should expect a test error of about 0.55% after 50 epochs using the parameters in the code (learning rate = 0.1). You can also see an example of learning rate annealing in this code.
