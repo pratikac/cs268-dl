@@ -30,14 +30,14 @@ kwargs = {}
 if opt['g'] > -1:
     kwargs = {'num_workers': 1, 'pin_memory': True}
 train_loader = th.utils.data.DataLoader(
-    datasets.MNIST('/local2/pratikac/mnist', train=True, download=True,
+    datasets.MNIST('data', train=True, download=True,
                     transform=transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,))
                    ])),
     batch_size=opt['b'], shuffle=True, **kwargs)
 test_loader = th.utils.data.DataLoader(
-    datasets.MNIST('/local2/pratikac/mnist', train=False,
+    datasets.MNIST('data', train=False,
                     transform=transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,))
