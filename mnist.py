@@ -112,7 +112,7 @@ def train(e):
         fs.append(f.data[0])
         top1.append(err)
 
-        if i % 100 == 0:
+        if i % 10 == 0:
             print('[%2d][%4d/%4d] %2.4f %2.3f%%'%(e, i, maxb, np.mean(fs), np.mean(top1)))
     print('Train: [%2d] %2.4f %2.3f%%'%(e, np.mean(fs), np.mean(top1)))
     print('')
