@@ -13,7 +13,7 @@ from torchvision import datasets, transforms
 p = argparse.ArgumentParser('')
 p.add_argument('--lr', type=float, default=0.1, help='Learning rate')
 p.add_argument('-b', type=int, default=128, help='Batch size')
-p.add_argument('-B', type=int, default=100, help='Epochs')
+p.add_argument('-B', type=int, default=50, help='Epochs')
 p.add_argument('-g', type=int, default=-1, help='GPU idx. (-1 for CPU)')
 opt = vars(p.parse_args())
 print(opt)
@@ -30,14 +30,14 @@ kwargs = {}
 if opt['g'] > -1:
     kwargs = {'num_workers': 1, 'pin_memory': True}
 train_loader = th.utils.data.DataLoader(
-    datasets.MNIST('data', train=True, download=True,
+    datasets.MNIST('/local2/pratikac/mnist', train=True, download=True,
                     transform=transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,))
                    ])),
     batch_size=opt['b'], shuffle=True, **kwargs)
 test_loader = th.utils.data.DataLoader(
-    datasets.MNIST('data', train=False,
+    datasets.MNIST('/local2/pratikac/mnist', train=False,
                     transform=transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,))
@@ -86,8 +86,20 @@ optimizer = optim.SGD(model.parameters(), lr=opt['lr'], momentum=0.9)
 
 print('[Start training]')
 
+def lr_schedule(e):
+    step, factor = 15, 0.5
+    lr = opt['lr']*factor**(e // step)
+    print('[LR]: ', lr)
+
+    # pytorch is weird, we have to modify the learning rate
+    # for optim.SGD like this
+    for g in optimizer.param_groups:
+        g['lr'] = lr
+
 def train(e):
     model.train()
+
+    lr_schedule(e)
 
     maxb = len(train_loader)
     fs, top1 = [], []
@@ -112,7 +124,7 @@ def train(e):
         fs.append(f.data[0])
         top1.append(err)
 
-        if i % 10 == 0:
+        if i % 100 == 0:
             print('[%2d][%4d/%4d] %2.4f %2.3f%%'%(e, i, maxb, np.mean(fs), np.mean(top1)))
     print('Train: [%2d] %2.4f %2.3f%%'%(e, np.mean(fs), np.mean(top1)))
     print('')
